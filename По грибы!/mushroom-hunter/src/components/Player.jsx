@@ -4,12 +4,14 @@ import * as THREE from "three"
 
 const SPEED=5
 const rotationSpeed=0.002
+
 export default function Player(){
     const {camera,gl,scene}=useThree()
     const keys=useRef({})
     const direction=useRef(new THREE.Vector3())
     const mouseMovement=useRef({x:0,y:0})
-
+    const raycaster=useRef(new THREE.Raycaster())
+    const down=new THREE.Vector3(0,-1,0)
     const playerRef=useRef(new THREE.Object3D())
     const pitchRef=useRef(new THREE.Object3D())
 
@@ -42,7 +44,6 @@ export default function Player(){
             document.removeEventListener("mousemove",onMouseMove)
         }
     },[])
-
     useFrame((_,delta)=>{
         playerRef.current.rotation.y-=mouseMovement.current.x*rotationSpeed
         pitchRef.current.rotation.x-=mouseMovement.current.y*rotationSpeed
@@ -57,17 +58,28 @@ export default function Player(){
         if(keys.current["KeyD"]) direction.current.x-=1
         direction.current.normalize()
 
-        const angle=playerRef.current.rotation.y
-        const dx=direction.current.x*Math.cos(angle)-direction.current.z*Math.sin(angle)
-        const dz=direction.current.x*Math.sin(angle)+direction.current.z*Math.cos(angle)
+        const forward=new THREE.Vector3()
+        playerRef.current.getWorldDirection(forward)
+        forward.y=0
+        forward.normalize()
 
-        playerRef.current.position.x+=dx*SPEED*delta
-        playerRef.current.position.z+=dz*SPEED*delta
+        const right=new THREE.Vector3()
+        right.crossVectors(forward,new THREE.Vector3(0,1,0)).normalize()
+
+        const move=new THREE.Vector3()
+            .addScaledVector(forward,direction.current.z)
+            .addScaledVector(right,direction.current.x)
+            .normalize()
+            .multiplyScalar(SPEED*delta)
+        
+        const nextPosition=playerRef.current.position.clone().add(move)
+        raycaster.current.set(nextPosition.clone().add(new THREE.Vector3(0,1,0),down))
+        const intersects=raycaster.current.intersectObjects(scene.children,true)
+        if (intersects.length>0){
+            const groundY=intersects[0].point.y
+            nextPosition.y=groundY+1.7
+            playerRef.current.position.copy(nextPosition)
+        }
     })
-    return(
-        <mesh position={[0,1,0]} castShadow>
-            <boxGeometry args={[1,1,1]} />
-            <meshStandardMaterial color="orange" />
-        </mesh>
-    )
+    return(null)
 }
