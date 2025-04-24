@@ -73,7 +73,7 @@ export default function Player(){
             .multiplyScalar(SPEED*delta)
         
         const nextPosition=playerRef.current.position.clone().add(move)
-        raycaster.current.set(nextPosition.clone().add(new THREE.Vector3(0,1,0),down))
+        // raycaster.current.set(nextPosition.clone().add(new THREE.Vector3(0,1,0).down))
         const intersects=raycaster.current.intersectObjects(scene.children,true)
         if (intersects.length>0){
             const groundY=intersects[0].point.y
