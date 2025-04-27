@@ -44,6 +44,19 @@ export default function Player(){
             document.removeEventListener("mousemove",onMouseMove)
         }
     },[])
+    const treesRef=useRef([]);
+    const checkCollisionTrees=(nextPosition)=>{
+        let isColliding=false;
+        scene.children.forEach((child)=>{
+            if (child.type==="Group"){
+                const treeBox=new THREE.Box3().setFromObject(child);
+                if (treeBox.containsPoint(nextPosition)){
+                    isColliding=true;
+                }
+            }
+        });
+        return isColliding;
+    }
     useFrame((_,delta)=>{
         playerRef.current.rotation.y-=mouseMovement.current.x*rotationSpeed
         pitchRef.current.rotation.x-=mouseMovement.current.y*rotationSpeed
@@ -73,13 +86,13 @@ export default function Player(){
             .multiplyScalar(SPEED*delta)
         
         const nextPosition=playerRef.current.position.clone().add(move)
-        // raycaster.current.set(nextPosition.clone().add(new THREE.Vector3(0,1,0).down))
-        const intersects=raycaster.current.intersectObjects(scene.children,true)
+        if (!checkCollisionTrees(nextPosition)){
+            raycaster.current.set(nextPosition.clone().add(new THREE.Vector3(0,1,0)),down)
+            const intersects=raycaster.current.intersectObjects(scene.children,true)
         if (intersects.length>0){
             const groundY=intersects[0].point.y
             nextPosition.y=groundY+1.7
             playerRef.current.position.copy(nextPosition)
-        }
-    })
+        }}});
     return(null)
 }
