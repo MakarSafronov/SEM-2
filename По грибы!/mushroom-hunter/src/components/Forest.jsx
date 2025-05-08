@@ -1,6 +1,5 @@
 import { useMemo } from "react"
 import * as THREE from "three"
-import Mushroom from "./Mushroom"
 
 export default function Forest(){
     const geometry=useMemo(()=>{
@@ -15,21 +14,12 @@ export default function Forest(){
         geom.computeVertexNormals()
         geom.rotateX(-Math.PI/2)
         return geom
-    },[]);
-    const mushroomPositions=[];
-    for(let i=0;i<10;i++){
-        const x=(Math.random()-0.5)*200;
-        const z=(Math.random()-0.5)*200;
-        mushroomPositions.push(new THREE.Vector3(x,0,z));
-    }
+    },[])
     return(
         <>
         <mesh geometry={geometry} receiveShadow name="ground">
             <meshStandardMaterial color="green" />
         </mesh>
-        {mushroomPositions.map((position,index)=>(
-            <Mushroom key={index} position={position} />
-        ))}
         </>
     );
 }
