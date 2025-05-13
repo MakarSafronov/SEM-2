@@ -5,6 +5,7 @@ import Trees from "../components/Trees"
 import Mushroom from "../components/Mushroom"
 
 
+
 export default function GameScene(){
     return(
         <>
@@ -15,6 +16,7 @@ export default function GameScene(){
             <Player />
             <Trees/>
             <Mushroom position={[10,7,2]} />
+
         </>
     )
 }
